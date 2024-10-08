@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Milk Collection - Dairy Director{% endblock %}
+
+{% block content %}
+<div style="padding: 20px; background-color: #f7f7f7; overflow: scroll; height: 85%">
+    <h1 style="text-align: center; color: #333;">Milk Collection</h1>
+    
+    <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); display: flex; max-height: 500px; justify-content: space-between; align-items: center">
+        <div>
+                
+            <h2>Total Milk Collected</h2>
+            <h3><strong>Today:</strong> <span style="color: #4CAF50;">{{ total_milk_today }} Liters</span></h3>
+            <h3><strong>This Month:</strong> <span style="color: #2196F3;">{{ total_milk_month }} Liters</span></h3>
+            <h3><strong>This Year:</strong> <span style="color: #FF9800;">{{ total_milk_year }} Liters</span></h3>
+        </div>
+        <!-- Pie chart canvas -->
+        <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+            <h2>Milk Collection Trend</h2>
+            <canvas id="milkLineChart" width="400" height="400"></canvas>
+        </div>
+
+        <div>
+            <h1> Milk Production Pie-Chart </h1>
+            <canvas id="milkChart" width="200px" height="200"
+                style='width: 300px; overflow: hidden'
+            >
+        
+            </canvas>
+        </div>
+    </div>
+    
+    <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+        <h2>Add Milk Collection</h2>
+        <form method="post">
+            {% csrf_token %}
+            <label for="cow_name">Cow Name:</label>
+            <br />
+            <input type="text" id="cow_name" name="cow_name" required style="width: 90%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <br />
+            <label for="litres">Litres Delivered:</label>
+            <br />
+
+            <input type="number" id="litres" name="litres" required style="width: 90%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <br />
+            
+            <label for="delivery_date">Delivery Date:</label>
+            <br />
+
+            <input type="date" id="delivery_date" name="delivery_date" required style="width: 90%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+            <br />
+            
+            <button type="submit" style="padding: 12px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">
+                Add Milk
+            </button>
+        </form>
+    </div>
+    
+    <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+        <h2>Milk Collection Records</h2>
+        <div style="max-height: 400px; overflow-y: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ddd; padding: 10px; background-color: #f2f2f2;">Cow Name</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; background-color: #f2f2f2;">Litres Delivered</th>
+                        <th style="border: 1px solid #ddd; padding: 10px; background-color: #f2f2f2;">Delivery Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if milk_records %}
+                        {% for record in milk_records %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ record.cow_name }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ record.litres }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ record.delivery_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 8px;">No milk records found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Automatically scroll to the bottom of the records table when a new record is added
+    window.onload = function() {
+        var recordsDiv = document.querySelector('div[style*="max-height: 400px"]');
+        if (recordsDiv) {
+            recordsDiv.scrollTop = recordsDiv.scrollHeight;
+        }
+    };
+</script>
+
+
+<!-- Load Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Pie chart for total milk collection
+    var ctx = document.getElementById('milkChart').getContext('2d');
+    var milkChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Today', 'This Month', 'This Year'],
+            datasets: [{
+                label: 'Total Milk Collected',
+                data: [{{ total_milk_today }}, {{ total_milk_month }}, {{ total_milk_year }}],
+                backgroundColor: ['#4CAF50', '#2196F3', '#FF9800'],
+                borderColor: ['#4CAF50', '#2196F3', '#FF9800'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    enabled: true
+                }
+            }
+        }
+    });
+
+
+    // Line chart for milk collection trend
+    var lineCtx = document.getElementById('milkLineChart').getContext('2d');
+    var milkLineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for date in milk_trend_dates %}'{{ date }}',{% endfor %}],  // Dates for the x-axis
+            datasets: [{
+                label: 'Milk Collected (Litres)',
+                data: [{% for value in milk_trend_values %}{{ value }},{% endfor %}],  // Milk values for the y-axis
+                fill: false,
+                borderColor: '#42A5F5',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Litres Collected'
+                    }
+                }
+            }
+        }
+    });
+        
+</script>
+
+{% endblock %}

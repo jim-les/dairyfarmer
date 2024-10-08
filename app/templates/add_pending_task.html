@@ -1,0 +1,39 @@
+<!-- add_pending_task.html -->
+{% extends 'base.html' %}
+
+{% block title %}Add Pending Task - Dairy Director{% endblock %}
+
+{% block content %}
+<div style="padding: 20px; display: flex; justify-content: center; align-items: center; height: 80vh; background-color: #f4f4f9;">
+    <div style="background-color: white; padding: 30px 40px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
+        <h1 style="margin-bottom: 20px; font-size: 24px; color: #333;">Add Pending Task</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label for="task_name" style="font-size: 16px; color: #555; margin-bottom: 5px; display: block;">Task Name:</label>
+                <input type="text" id="task_name" name="task_name" required 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box; transition: all 0.3s;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="due_date" style="font-size: 16px; color: #555; margin-bottom: 5px; display: block;">Due Date:</label>
+                <input type="date" id="due_date" name="due_date" required 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box; transition: all 0.3s;">
+            </div>
+            
+            <div style="display: flex; justify-content: space-between;">
+                <button type="submit" 
+                        style="padding: 12px 30px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.3s;">
+                    Add Task
+                </button>
+                <a href="{% url 'dashboard' %}">
+                    <button type="button" 
+                            style="padding: 12px 30px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.3s;">
+                        Cancel
+                    </button>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+<!-- reports.html -->
+{% extends 'base.html' %}
+
+{% block title %}Reports - Dairy Director{% endblock %}
+
+{% block content %}
+<style>
+    /* Add this to your CSS file or within <style> tags in base.html */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #eef2f3;
+    }
+
+    .report-section {
+        transition: box-shadow 0.3s;
+    }
+
+    .report-section:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        color: #333;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 5px;
+    }
+
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    ul li {
+        padding: 5px 0;
+        font-size: 16px;
+        color: #555;
+    }
+
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact; /* For Chrome */
+            print-color-adjust: exact; /* For Firefox */
+        }
+
+        button {
+            display: none; /* Hide the print button during printing */
+        }
+
+        .report-section {
+            page-break-after: always; /* Ensures each section starts on a new page */
+        }
+    }
+</style>
+
+<h1 style="text-align: center; margin-bottom: 20px;">Reports</h1>
+
+<!-- Print Button -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Print Report
+    </button>
+</div>
+
+<!-- Pending Tasks Section -->
+<section class="report-section" style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; margin-bottom: 20px; background-color: #f9f9f9;">
+    <h2>Pending Tasks</h2>
+    <ul>
+        {% for task in pending_tasks %}
+            <li>{{ task.task_name }} - Due: {{ task.due_date }} - Completed: {{ task.is_completed }}</li>
+        {% empty %}
+            <li>No pending tasks.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<!-- Milk Records Section -->
+<section class="report-section" style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; margin-bottom: 20px; background-color: #f9f9f9;">
+    <h2>Milk Records</h2>
+    <ul>
+        {% for record in milk_records %}
+            <li>{{ record.cow_name }} - {{ record.litres }}L on {{ record.delivery_date }}</li>
+        {% empty %}
+            <li>No milk records available.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add Canvas for Chart -->
+    <canvas id="milkChart" style="width: 100%; max-width: 600px; height: 400px;"></canvas>
+</section>
+
+<!-- Vaccinated Cows Section -->
+<section class="report-section" style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; margin-bottom: 20px; background-color: #f9f9f9;">
+    <h2>Vaccinated Cows</h2>
+    <ul>
+        {% for cow in vaccinated_cows %}
+            <li>{{ cow.cow_name }} - Vaccinated on: {{ cow.vaccine_date }}</li>
+        {% empty %}
+            <li>No vaccinated cows available.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data for the chart (you can customize this to fit your needs)
+        const milkRecords = [
+            {% for record in milk_records %}
+                { name: "{{ record.cow_name }}", litres: {{ record.litres }} },
+            {% endfor %}
+        ];
+
+        // Prepare labels and data
+        const labels = milkRecords.map(record => record.name);
+        const data = milkRecords.map(record => record.litres);
+
+        // Chart configuration
+        const ctx = document.getElementById('milkChart').getContext('2d');
+        const milkChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Milk Production (Litres)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

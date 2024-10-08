@@ -1,0 +1,120 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dairy Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <link rel="icon" href="{% static './images/logo.png' %}" type="image/png">
+
+</head>
+   
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'images/logo.png' %}" alt="Dairy Director Logo" class="logo" style='widthe: 100%'>
+                <h2>Dairy Director</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'milk-collection' %}" class="{% if request.path == '/milk-collection/' %}active{% endif %}">
+                            Milk
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'vaccination' %}" class="{% if request.path == '/vaccination/' %}active{% endif %}">
+                            Vaccinations
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'report' %}" class="{% if request.path == '/report/' %}active{% endif %}">
+                            Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-support">
+                <a href="{% url 'logout' %}">Logout / </a>
+                <a href="{% url 'dashboard' %}">Support</a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="welcome">
+                    <h1>Hello, {{ user.first_name }} 👋</h1>
+                    <p>Take coffee on days ending with "y"</p>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 100px">
+                    <p><b>{{ current_date }}</b></p>
+                    <img src="{% static 'images/user_avatar.png' %}" alt="User Avatar" class="user-avatar">
+                </div>
+            </header>
+
+            <!-- Placeholder for dashboard content -->
+            {% block content %}
+            <!-- Content from child templates will go here -->
+            {% endblock %}
+        </main>
+
+        <!-- Chatbot Widget -->
+        <div class="chatbot-widget">
+            {% comment %} <button class="chatbot-btn" onclick="toggleChat()">💬</button> {% endcomment %}
+
+            <div class="chat-window" id="chat-window">
+                <div class="chat-header">Chat with us!</div>
+                <div class="chat-body" id="chat-body">
+                    <p>Hello! How can I assist you today?</p>
+                </div>
+                <div class="chat-footer">
+                    <input type="text" id="chat-input" placeholder="Type a message..." />
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    function toggleChat() {
+        const chatWindow = document.getElementById('chat-window');
+        chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function sendMessage() {
+        const chatInput = document.getElementById('chat-input');
+        const chatBody = document.getElementById('chat-body');
+        
+        if (chatInput.value.trim() !== "") {
+            const userMessage = document.createElement('p');
+            userMessage.style.textAlign = 'right';
+            userMessage.textContent = chatInput.value;
+            chatBody.appendChild(userMessage);
+            chatInput.value = "";
+
+            // Simulate bot response
+            setTimeout(() => {
+                const botMessage = document.createElement('p');
+                botMessage.textContent = "Thank you for your message!";
+                chatBody.appendChild(botMessage);
+                chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to the bottom
+            }, 1000);
+        }
+    }
+</script>
+
+
+</html>
