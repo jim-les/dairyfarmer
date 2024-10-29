@@ -200,3 +200,40 @@ def milk_collection(request):
     }
 
     return render(request, 'milk_collection.html', context)
+
+
+import google.generativeai as genai
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+import json
+# Configure the API key for authentication
+genai.configure(api_key="AIzaSyDmVgtBtEqHyCPhEL4naok1ZjRdRmdB7iI")
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+
+@csrf_exempt  # Use this only for testing; consider proper CSRF handling for production
+def generate_text(request):
+    if request.method == "POST":
+        try:
+            # Read the JSON body
+            body = json.loads(request.body)
+            user_input = body.get('user_input', '')
+        except json.JSONDecodeError:
+            return JsonResponse({'response_text': 'Invalid JSON'}, status=400)
+
+        prompt = f"You are a helpful assistant for Dairy Farmers. Answer the following question: {user_input}"
+        print(f"Prompt: {prompt}")
+
+        # Generate content using the AI model
+        response = model.generate_content(prompt)
+
+        # Extract the text from the response
+        try:
+            response_text = response.candidates[0].content.parts[0].text
+        except (IndexError, AttributeError):
+            response_text = "Sorry, I couldn't generate a response."
+
+        return JsonResponse({'response_text': response_text})
+
+    return JsonResponse({'response_text': ''})

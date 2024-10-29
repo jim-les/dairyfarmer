@@ -17,4 +17,5 @@ urlpatterns = [
     path('milk-collection/', views.milk_collection, name='milk-collection'), 
     path('report', views.report, name='report'),
     path('logout/', views.logout_view, name='logout'),
+    path('generate-text/', views.generate_text, name='generate_text'),
 ]
